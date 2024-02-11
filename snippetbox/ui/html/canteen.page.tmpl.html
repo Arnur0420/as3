@@ -1,0 +1,18 @@
+{{template "base" .}}
+{{define "title"}}Meals List{{end}}
+{{define "main"}}
+<body>
+<h1>Meals List</h1>
+<ul>
+    {{range .Meals}}
+    <li>
+        <div class='metadata'>
+            <strong>{{.MealName}}</strong>
+            <span>#{{.ID}}</span>
+        </div>
+        <pre><code>Quantity: {{.Quantity}}</code></pre>
+    </li>
+    {{end}}
+</ul>
+</body>
+{{end}}

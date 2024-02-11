@@ -1,0 +1,20 @@
+{{template "base" .}}
+{{define "title"}}Create Meal{{end}}
+{{define "main"}}
+<h1>Create a New Meal</h1>
+<form action="/create" method="post">
+    <label for="meal_name">Meal Name:</label>
+    <input type="text" id="meal_name" name="meal_name" required>
+    <br>
+
+    <label for="weekday">Weekday:</label>
+    <input type="text" id="weekday" name="weekday" required>
+    <br>
+
+    <label for="quantity">Quantity:</label>
+    <input type="number" id="quantity" name="quantity" required>
+    <br>
+
+    <input type="submit" value="Create Meal">
+</form>
+{{end}}
