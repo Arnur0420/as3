@@ -1,60 +1,86 @@
-body, h1, h2, h3, p, table {
+body {
+    font-family: 'Ubuntu Mono', monospace;
     margin: 0;
     padding: 0;
 }
 
-body {
-    line-height: 1.6;
+a {
+    text-decoration: none;
     color: #333;
 }
 
+/* Header */
 header {
-    background-color: #2c3e50;
-    color: #ecf0f1;
-    padding: 1em 0;
-    text-align: center;
+    background-color: #f2f2f2;
+    padding: 10px;
 }
 
 h1 a {
-    color: #ecf0f1;
-    text-decoration: none;
+    font-size: 24px;
 }
 
-/* Navigation styles */
+/* Navigation */
 nav {
-    background-color: #34495e;
-    color: #ecf0f1;
-    padding: 0.5em;
+    background-color: #f2f2f2;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+}
+
+nav div {
+    display: flex;
 }
 
 nav a {
-    color: #ecf0f1;
-    text-decoration: none;
-    margin: 0 1em; /* Add margin to create space around the links */
-}
-main {
-    padding: 2em;
+    margin-right: 10px;
 }
 
-h2 {
-    color: #2c3e50;
+/* Main Content */
+main {
+    padding: 20px;
+}
+
+.flash {
+    padding: 10px;
+    background-color: #f1c40f;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+/* Footer */
+footer {
+    background-color: #f2f2f2;
+    padding: 10px;
+    text-align: center;
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 1em;
+    margin-top: 20px;
 }
 
 th, td {
-    padding: 0.5em;
-    border: 1px solid #ddd;
+    border: 1px solid #333;
+    padding: 8px;
     text-align: left;
 }
 
 th {
-    background-color: #3498db;
-    color: #ecf0f1;
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+tr:hover {
+    background-color: #f1f1f1;
+}
+
+p {
+    margin-top: 20px;
 }
 
 footer {
@@ -91,13 +117,9 @@ footer {
     }
 }
 
-form {
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 20px;
-    background-color: #ecf0f1;
-    border: 1px solid #bdc3c7;
-    border-radius: 5px;
+
+.logout-button {
+    margin-left: auto;
 }
 
 label {
@@ -124,14 +146,19 @@ input[type="radio"] {
 }
 
 input[type="submit"] {
-    background-color: #3498db;
-    color: #ecf0f1;
-    padding: 10px 15px;
+    background-color: #4CAF50;
+    margin-top: 10px;
+    color: white;
+    padding: 10px 20px;
     border: none;
     border-radius: 4px;
     cursor: pointer;
 }
 
 input[type="submit"]:hover {
-    background-color: #2980b9;
+    background-color: #45a049;
+}
+
+input[type="submit"]:focus {
+    outline: none;
 }

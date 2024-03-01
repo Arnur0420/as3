@@ -9,11 +9,11 @@ import (
 	"strconv"
 )
 
-type Meal struct {
-	ID       int
-	MealName string
-	Weekday  string
-	Quantity int
+type Comment struct {
+	ID        int
+	UserID    int
+	SnippetID int
+	Text      string
 }
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
@@ -74,50 +74,68 @@ func (app *application) createSnippetForm(w http.ResponseWriter, r *http.Request
 		Form: forms.New(nil),
 	})
 }
-
-func (app *application) createMealForm(w http.ResponseWriter, r *http.Request) {
-	app.render(w, r, "createmeal.page.tmpl.html", &templateData{})
-}
-
-func (app *application) createMeal(w http.ResponseWriter, r *http.Request) {
+func (app *application) signupUser(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
 		app.clientError(w, http.StatusBadRequest)
 		return
 	}
-
-	mealForm := forms.NewMealForm(r.PostForm)
-	mealForm.Validate()
-
-	if !mealForm.Valid() {
-		app.render(w, r, "createmeal.page.tmpl.html", &templateData{})
+	form := forms.New(r.PostForm)
+	form.Required("name", "email", "password")
+	form.MaxLength("name", 255)
+	form.MaxLength("email", 255)
+	form.MatchesPattern("email", forms.EmailRX)
+	form.MinLength("password", 10)
+	if !form.Valid() {
+		app.render(w, r, "signup.page.tmpl.html", &templateData{Form: form})
 		return
 	}
-
-	quantity, err := strconv.Atoi(mealForm.Get("quantity"))
+	err = app.users.Insert(form.Get("name"), form.Get("email"), form.Get("password"))
 	if err != nil {
-		app.serverError(w, err)
+		if errors.Is(err, models.ErrDuplicateEmail) {
+			form.Errors.Add("email", "Address is already in use")
+			app.render(w, r, "signup.page.tmpl.html", &templateData{Form: form})
+		} else {
+			app.serverError(w, err)
+		}
 		return
 	}
-
-	_, err = app.meals.Insert(mealForm.Get("meal_name"), mealForm.Get("weekday"), quantity)
-	if err != nil {
-		app.serverError(w, err)
-		return
-	}
-
-	http.Redirect(w, r, "/list", http.StatusSeeOther)
+	app.session.Put(r, "flash", "Your signup was successful. Please log in.")
+	http.Redirect(w, r, "/user/login", http.StatusSeeOther)
 }
-func (app *application) listMeals(w http.ResponseWriter, r *http.Request) {
-	meals, err := app.meals.Latest()
+
+func (app *application) signupUserForm(w http.ResponseWriter, r *http.Request) {
+	app.render(w, r, "signup.page.tmpl.html", &templateData{
+		Form: forms.New(nil),
+	})
+}
+func (app *application) loginUserForm(w http.ResponseWriter, r *http.Request) {
+	app.render(w, r, "login.page.tmpl.html", &templateData{
+		Form: forms.New(nil),
+	})
+}
+func (app *application) loginUser(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
 	if err != nil {
-		app.serverError(w, err)
+		app.clientError(w, http.StatusBadRequest)
 		return
 	}
-
-	data := &templateData{
-		Meals: meals,
+	form := forms.New(r.PostForm)
+	id, err := app.users.Authenticate(form.Get("email"), form.Get("password"))
+	if err != nil {
+		if errors.Is(err, models.ErrInvalidCredentials) {
+			form.Errors.Add("generic", "Email or Password is incorrect")
+			app.render(w, r, "login.page.tmpl.html", &templateData{Form: form})
+		} else {
+			app.serverError(w, err)
+		}
+		return
 	}
-
-	app.render(w, r, "canteen.page.tmpl.html", data)
+	app.session.Put(r, "authenticatedUserID", id)
+	http.Redirect(w, r, "/snippet/create", http.StatusSeeOther)
+}
+func (app *application) logoutUser(w http.ResponseWriter, r *http.Request) {
+	app.session.Remove(r, "authenticatedUserID")
+	app.session.Put(r, "flash", "You've been logged out successfully!")
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }

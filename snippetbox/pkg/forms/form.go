@@ -2,11 +2,14 @@ package forms
 
 import (
 	"fmt"
+	"regexp"
 
 	"net/url"
 	"strings"
 	"unicode/utf8"
 )
+
+var EmailRX = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 
 type Form struct {
 	url.Values
@@ -27,6 +30,16 @@ func (f *Form) Required(fields ...string) {
 		}
 	}
 }
+func (f *Form) MinLength(field string, d int) {
+	value := f.Get(field)
+	if value == "" {
+		return
+	}
+	if utf8.RuneCountInString(value) < d {
+		f.Errors.Add(field, fmt.Sprintf("This field is too short (minimum is %d characters)", d))
+	}
+}
+
 func (f *Form) MaxLength(field string, d int) {
 	value := f.Get(field)
 	if value == "" {
@@ -48,28 +61,16 @@ func (f *Form) PermittedValues(field string, opts ...string) {
 	}
 	f.Errors.Add(field, "This field is invalid")
 }
-func (f *Form) Valid() bool {
-	return len(f.Errors) == 0
-}
 
-type MealForm struct {
-	Form
-}
-
-func NewMealForm(data url.Values) *MealForm {
-	return &MealForm{
-		Form: Form{
-			Values: data,
-			Errors: errors(map[string][]string{}),
-		},
+func (f *Form) MatchesPattern(field string, pattern *regexp.Regexp) {
+	value := f.Get(field)
+	if value == "" {
+		return
+	}
+	if !pattern.MatchString(value) {
+		f.Errors.Add(field, "This field is invalid")
 	}
 }
-
-func (f *MealForm) Validate() {
-	f.Required("meal_name", "weekday", "quantity")
-	f.MaxLength("meal_name", 100)
-}
-
-func (f *MealForm) Valid() bool {
+func (f *Form) Valid() bool {
 	return len(f.Errors) == 0
 }
